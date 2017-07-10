@@ -52,9 +52,14 @@ async function send (ctx, path, opts = {}) {
   const brotli = opts.brotli !== false
   const gzip = opts.gzip !== false
   const setHeaders = opts.setHeaders
+  const setHeadersBeforeSend = opts.setHeadersBeforeSend
 
   if (setHeaders && typeof setHeaders !== 'function') {
     throw new TypeError('option setHeaders must be function')
+  }
+
+  if (setHeadersBeforeSend && typeof setHeadersBeforeSend !== 'function') {
+    throw new TypeError('option setHeadersBeforeSend must be function')
   }
 
   // normalize path
@@ -134,6 +139,9 @@ async function send (ctx, path, opts = {}) {
     ctx.set('Cache-Control', directives.join(','))
   }
   ctx.type = type(path)
+
+  if (setHeadersBeforeSend) setHeadersBeforeSend(ctx)
+
   ctx.body = fs.createReadStream(path)
 
   return path
